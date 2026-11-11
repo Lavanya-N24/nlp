@@ -1,23 +1,27 @@
 
 from flask import Flask, request, Response
-import os
+from pathlib import Path
+import re
 
 app = Flask(__name__)
 
+LABS_DIR = Path(__file__).parent / "labs"
+
 @app.route("/")
 def get_lab():
-    lab_no = request.args.get("labno")
+    lab_id = request.args.get("labno", "")
 
-    if not lab_no or not lab_no.isdigit():
-        return "Invalid lab number", 400
+    if not re.fullmatch(r"[a-zA-Z0-9]+", lab_id):
+        return "Invalid lab ID", 400
 
-    path = os.path.join("labs", f"lab{lab_no}.py")
+    file_path = LABS_DIR / f"{lab_id}.py"
 
-    if not os.path.isfile(path):
-        return "Lab not found", 404
+    if not file_path.is_file():
+        return f"Lab not found: {lab_id}", 404
 
-    with open(path, encoding="utf-8") as f:
-        return Response(f.read(), mimetype="text/plain")
+    code = file_path.read_text(encoding="utf-8")
+    return Response(code, mimetype="text/plain")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+@app.route("/health")
+def health():
+    return "Server is running", 200
