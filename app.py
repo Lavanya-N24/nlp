@@ -4,8 +4,7 @@ from pathlib import Path
 import re
 
 app = Flask(__name__)
-
-LABS_DIR = Path(__file__).parent / "labs"
+LABS_DIR = Path(__file__).parent / "lab"
 
 @app.route("/")
 def get_lab():
